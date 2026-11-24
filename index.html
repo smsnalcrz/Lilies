@@ -516,8 +516,9 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 460px;
-      perspective: 1400px;
+      max-width: 440px;
+      perspective: 1200px;
+      -webkit-perspective: 1200px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -527,7 +528,9 @@
     .intro-envelope {
       position: relative;
       width: 100%;
-      height: clamp(250px, 46vw, 290px);
+      aspect-ratio: 16 / 10.2;
+      height: auto;
+      max-height: 280px;
       background:
         radial-gradient(ellipse at 50% 100%, rgba(246, 235, 230, 0.65), transparent 70%),
         var(--card-bg);
@@ -539,9 +542,18 @@
       overflow: visible;
       cursor: pointer;
       user-select: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
       animation: envelopeGentleFloat 4s ease-in-out infinite;
       transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
                   box-shadow 0.4s ease;
+    }
+
+    /* Pause float animation while opening so 3D coordinates don't glitch */
+    .intro-envelope.is-opening {
+      animation: none !important;
     }
 
     @keyframes envelopeGentleFloat {
@@ -549,11 +561,19 @@
       50% { transform: translateY(-5px); }
     }
 
-    .intro-envelope:hover {
-      transform: translateY(-7px) scale(1.01);
-      box-shadow:
-        0 30px 70px rgba(96, 62, 78, 0.18),
-        0 8px 24px rgba(96, 62, 78, 0.09);
+    @media (hover: hover) and (pointer: fine) {
+      .intro-envelope:hover {
+        transform: translateY(-7px) scale(1.01);
+        box-shadow:
+          0 30px 70px rgba(96, 62, 78, 0.18),
+          0 8px 24px rgba(96, 62, 78, 0.09);
+      }
+
+      [data-theme="dark"] .intro-envelope:hover {
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.75),
+          0 10px 30px rgba(0, 0, 0, 0.5);
+      }
     }
 
     [data-theme="dark"] .intro-envelope {
@@ -565,17 +585,11 @@
         0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
-    [data-theme="dark"] .intro-envelope:hover {
-      box-shadow:
-        0 32px 80px rgba(0, 0, 0, 0.75),
-        0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
     /* Folded letter preview inside intro envelope */
     .intro-letter-preview {
       position: absolute;
-      inset: 12px 14px 14px 14px;
-      height: 250px;
+      inset: 10px 14px 12px 14px;
+      height: calc(100% - 22px);
       background:
         radial-gradient(circle at 92% 8%, rgba(244, 214, 224, 0.25), transparent 36%),
         radial-gradient(circle at 8% 92%, rgba(235, 225, 246, 0.22), transparent 38%),
@@ -585,12 +599,12 @@
       box-shadow: 0 4px 14px rgba(96, 62, 78, 0.08);
       z-index: 2;
       pointer-events: none;
-      padding: 22px 24px;
+      padding: clamp(14px, 3.5vw, 22px) clamp(16px, 4vw, 24px);
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      transform: translateY(16px);
+      transform: translateY(12px);
       opacity: 0.95;
       transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1),
                   box-shadow 0.85s ease;
@@ -624,13 +638,13 @@
 
     /* Sliding animation when envelope opens */
     .intro-envelope.is-sliding .intro-letter-preview {
-      transform: translateY(-115px);
+      transform: translateY(-90px);
       box-shadow: 0 20px 48px rgba(96, 62, 78, 0.18);
     }
 
     /* Gentle unfolding effect */
     .intro-envelope.is-unfolding .intro-letter-preview {
-      transform: translateY(-130px) scale(1.05);
+      transform: translateY(-102px) scale(1.03);
       box-shadow: 0 24px 55px rgba(96, 62, 78, 0.22);
     }
 
@@ -795,10 +809,14 @@
       left: 0;
       right: 0;
       height: 58%;
-      transform-origin: top center;
+      transform-origin: 50% 0%;
+      -webkit-transform-origin: 50% 0%;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       transition: transform 0.72s cubic-bezier(0.4, 0, 0.2, 1),
-                  z-index 0.35s step-end,
-                  opacity 0.3s ease;
+                  z-index 0.35s step-end;
       z-index: 5;
       pointer-events: none;
     }
@@ -825,6 +843,7 @@
 
     .intro-envelope.is-opening .envelope-flap {
       transform: rotateX(180deg);
+      -webkit-transform: rotateX(180deg);
       z-index: 1;
     }
 
@@ -908,31 +927,36 @@
       pointer-events: none;
     }
 
-    /* "Open Me" handwritten tag button */
+    /* "Open Me" handwritten invitation button */
     .open-me-tag {
-      position: absolute;
-      bottom: 22px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 6;
+      position: relative;
       appearance: none;
-      background: rgba(255, 252, 248, 0.94);
+      background: rgba(255, 252, 248, 0.96);
       backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(201, 111, 136, 0.38);
       border-radius: var(--radius-pill);
-      padding: 6px 22px;
-      box-shadow: 0 4px 14px rgba(96, 62, 78, 0.12);
+      padding: 8px 26px;
+      box-shadow:
+        0 4px 14px rgba(96, 62, 78, 0.12),
+        0 1px 3px rgba(0, 0, 0, 0.05);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
       transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
     }
 
     [data-theme="dark"] .open-me-tag {
-      background: rgba(38, 26, 44, 0.92);
+      background: rgba(38, 26, 44, 0.94);
       border-color: rgba(229, 130, 157, 0.38);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.45),
+        0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .open-me-text {
@@ -944,15 +968,21 @@
       letter-spacing: 0.02em;
     }
 
-    .intro-envelope:hover .open-me-tag {
-      transform: translateX(-50%) translateY(-2px);
-      background: rgba(255, 255, 255, 0.98);
-      box-shadow: 0 6px 18px rgba(201, 111, 136, 0.24);
+    .open-me-tag:active {
+      transform: scale(0.96);
     }
 
-    .intro-envelope.is-opening .open-me-tag {
+    @media (hover: hover) and (pointer: fine) {
+      .open-me-tag:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 6px 18px rgba(201, 111, 136, 0.24);
+      }
+    }
+
+    .intro-envelope.is-opening ~ .open-me-tag {
       opacity: 0;
-      transform: translateX(-50%) translateY(8px);
+      transform: translateY(8px);
       pointer-events: none;
     }
 
@@ -1279,6 +1309,88 @@
       }
     }
 
+    @media (max-width: 600px) {
+      .intro-screen {
+        padding: 16px 12px;
+      }
+
+      .intro-envelope-wrap {
+        max-width: 355px;
+        gap: 14px;
+        margin-top: 32px;
+      }
+
+      .intro-envelope {
+        aspect-ratio: 16 / 10.4;
+        border-radius: 18px;
+      }
+
+      .intro-letter-preview {
+        padding: 12px 14px;
+      }
+
+      .preview-heading {
+        font-size: 1.05rem;
+        margin: 2px 0 4px;
+      }
+
+      .preview-snippet {
+        font-size: 1.15rem;
+        margin: 4px 0 0;
+      }
+
+      .vintage-stamp {
+        top: 10px;
+        right: 12px;
+        transform: scale(0.82);
+        transform-origin: top right;
+      }
+
+      .envelope-address {
+        left: 14px;
+        bottom: 12px;
+      }
+
+      .address-to {
+        font-size: 1.25rem;
+      }
+
+      .address-hint {
+        font-size: 0.75rem;
+        margin: 2px 0 0;
+      }
+
+      .wax-seal {
+        width: 54px;
+        height: 54px;
+      }
+
+      .wax-seal-rim {
+        width: 36px;
+        height: 36px;
+      }
+
+      .wax-seal-initial {
+        font-size: 1.35rem;
+      }
+
+      .open-me-tag {
+        padding: 8px 24px;
+      }
+
+      .open-me-text {
+        font-size: 1.25rem;
+      }
+
+      .intro-envelope.is-sliding .intro-letter-preview {
+        transform: translateY(-75px);
+      }
+
+      .intro-envelope.is-unfolding .intro-letter-preview {
+        transform: translateY(-84px) scale(1.02);
+      }
+    }
+
     @media (max-width: 420px) {
       .stage-frame {
         aspect-ratio: 1 / 1.12;
@@ -1293,6 +1405,23 @@
 
       .stage-hint {
         font-size: 0.7rem;
+      }
+
+      .intro-envelope-wrap {
+        max-width: 315px;
+        margin-top: 24px;
+      }
+
+      .address-to {
+        font-size: 1.12rem;
+      }
+
+      .intro-envelope.is-sliding .intro-letter-preview {
+        transform: translateY(-65px);
+      }
+
+      .intro-envelope.is-unfolding .intro-letter-preview {
+        transform: translateY(-72px) scale(1.02);
       }
     }
 
@@ -1369,14 +1498,14 @@
           </div>
         </div>
 
-        <!-- Handwritten "Open Me" tag button -->
-        <button type="button" class="open-me-tag" id="openMeBtn" aria-label="Open birthday letter">
-          <span class="open-me-text">Open Me ♡</span>
-        </button>
-
       </div>
 
-      <p class="intro-hint">A little surprise for you ✨</p>
+      <!-- Handwritten "Open Me" call-to-action button placed right below envelope -->
+      <button type="button" class="open-me-tag" id="openMeBtn" aria-label="Open birthday letter">
+        <span class="open-me-text">Open Me ♡</span>
+      </button>
+
+      <p class="intro-hint">Tap envelope or button to open ✨</p>
     </div>
   </aside>
 
@@ -2727,12 +2856,16 @@ Happy birthday once again, my bebe. I love youuu!`,
        * ===================================================================== */
       const introScreen = document.getElementById("introScreen");
       const introEnvelope = document.getElementById("introEnvelope");
+      const introWaxSeal = document.getElementById("introWaxSeal");
       const openMeBtn = document.getElementById("openMeBtn");
       const reopenEnvelopeBtn = document.getElementById("reopenEnvelopeBtn");
       const pageShell = document.querySelector(".page-shell");
 
       let isOpening = false;
       let hasRevealedMain = false;
+
+      // Lock body scroll while intro screen is active to prevent accidental swiping on mobile
+      document.body.style.overflow = "hidden";
 
       function openEnvelope() {
         if (isOpening || hasRevealedMain) return;
@@ -2745,12 +2878,12 @@ Happy birthday once again, my bebe. I love youuu!`,
         // Step 2: Letter card slowly slides upward out of the pocket
         setTimeout(() => {
           introEnvelope.classList.add("is-sliding");
-        }, 420);
+        }, 400);
 
         // Step 3: Paper unfurls and expands gently
         setTimeout(() => {
           introEnvelope.classList.add("is-unfolding");
-        }, 880);
+        }, 850);
 
         // Step 4: Gentle, magical transition revealing the bouquet and letter
         setTimeout(() => {
@@ -2758,18 +2891,22 @@ Happy birthday once again, my bebe. I love youuu!`,
           introScreen.classList.add("is-revealed");
           pageShell.classList.add("is-visible");
 
+          // Restore normal page scrolling on mobile
+          document.body.style.overflow = "";
+          window.scrollTo({ top: 0, behavior: "instant" });
+
           // Start typing the personal letter beneath the bouquet
           setTimeout(() => {
             if (!typingStarted) {
               startTypingAnimation();
             }
           }, 450);
-        }, 1500);
+        }, 1450);
 
         // Step 5: Cleanly hide intro screen after transition completes
         setTimeout(() => {
           introScreen.style.display = "none";
-        }, 2500);
+        }, 2400);
       }
 
       function reopenEnvelope(e) {
@@ -2789,7 +2926,10 @@ Happy birthday once again, my bebe. I love youuu!`,
         textNode.nodeValue = "";
         cursorEl.classList.remove("is-done");
 
-        // Bring back intro envelope screen
+        // Scroll back to top and lock scroll for intro
+        window.scrollTo({ top: 0, behavior: "instant" });
+        document.body.style.overflow = "hidden";
+
         introScreen.style.display = "flex";
         void introScreen.offsetWidth;
 
@@ -2804,11 +2944,17 @@ Happy birthday once again, my bebe. I love youuu!`,
         }, 350);
       }
 
-      introEnvelope.addEventListener("click", () => {
-        if (!isOpening && !hasRevealedMain) {
+      function addTriggerListener(el) {
+        if (!el) return;
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
           openEnvelope();
-        }
-      });
+        });
+      }
+
+      addTriggerListener(introEnvelope);
+      addTriggerListener(openMeBtn);
+      addTriggerListener(introWaxSeal);
 
       introEnvelope.addEventListener("keydown", (e) => {
         if (!isOpening && !hasRevealedMain && (e.key === "Enter" || e.key === " ")) {
@@ -2816,15 +2962,6 @@ Happy birthday once again, my bebe. I love youuu!`,
           openEnvelope();
         }
       });
-
-      if (openMeBtn) {
-        openMeBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (!isOpening && !hasRevealedMain) {
-            openEnvelope();
-          }
-        });
-      }
 
       if (reopenEnvelopeBtn) {
         reopenEnvelopeBtn.addEventListener("click", reopenEnvelope);
